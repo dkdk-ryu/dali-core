@@ -17,6 +17,7 @@
 
 #include <dali/graphics/graphics-manager.h>
 
+#include <vulkan/vulkan.hpp>
 
 namespace Dali
 {
@@ -24,7 +25,9 @@ namespace Graphics
 {
 
 int Manager::GetNumber() const
-{
+{  
+  auto mInstance = vk::Instance{};
+  mInstance = nullptr;
   return 42;
 }
 

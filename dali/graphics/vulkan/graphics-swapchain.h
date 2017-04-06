@@ -5,6 +5,9 @@
 #ifndef DALI_CORE_GRAPHICS_SWAPCHAIN_H
 #define DALI_CORE_GRAPHICS_SWAPCHAIN_H
 
+#include <cinttypes>
+#include "common.h"
+
 namespace Dali
 {
 namespace Graphics
@@ -12,15 +15,24 @@ namespace Graphics
 namespace Vulkan
 {
 
+enum class DepthStencil
+{
+  NONE,
+  DEPTH_16,
+  DEPTH_24,
+  DEPTH_16_STENCIL_8,
+  DEPTH_24_STENCIL_8
+};
+
 namespace Internal
 {
 class GraphicsSwapchainImplBase;
 }
 
 class GraphicsAdaptor;
-class GraphicsSurfaceImplBase;
+class GraphicsContext;
 
-class GraphicsSwapchain
+class GraphicsSwapchain : public Handle<Internal::GraphicsSwapchainImplBase>
 {
 public:
 
@@ -33,13 +45,11 @@ public:
 
   GraphicsSwapchain( Internal::GraphicsSwapchainImplBase* impl );
 
-  static GraphicsSwapchain New( GraphicsAdaptor& device, GraphicsSurfaceImplBase& surface );
+  void SwapBuffers( bool vsync );
 
-  void SwapBuffers();
+  int GetBufferCount();
 
-private:
-
-  Internal::GraphicsSwapchainImplBase* mImpl = { nullptr };
+  int GetCurrentBuffer();
 
 };
 

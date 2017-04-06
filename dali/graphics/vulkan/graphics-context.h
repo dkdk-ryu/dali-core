@@ -24,12 +24,11 @@ class GraphicsSurface;
 class GraphicsAdaptor;
 
 // context is equivalent of device
-class GraphicsContext : public Handle<Internal::GraphicsContextImplBase>
+class GraphicsContext : public Handle< Internal::GraphicsContextImplBase >
 {
 public:
-
-  GraphicsContext()                       = default;
-/*
+  GraphicsContext() = default;
+  /*
   GraphicsContext(const GraphicsContext&) = default;
   GraphicsContext(GraphicsContext&)       = default;
   GraphicsContext(GraphicsContext&&)      = default;
@@ -38,17 +37,20 @@ public:
 */
   GraphicsContext(Internal::GraphicsContextImplBase* impl);
 
-  GraphicsSwapchain CreateSwapchain(const GraphicsSurface& surface, uint32_t bufferCount);
+  GraphicsSwapchain CreateSwapchain(const GraphicsSurface& surface,
+                                    uint32_t               bufferCount,
+                                    DepthStencil           depthStencilMode,
+                                    bool                   enforceVSync);
 
 public:
   // API
-  template <typename T>
+  template< typename T >
   static GraphicsContext New(const GraphicsAdaptor& adaptor, const GraphicsSurface& surface, const ExtensionNameList& extensions)
   {
     auto impl = new T(adaptor, surface, extensions);
-    if( impl->Initialise() )
+    if(impl->Initialise())
     {
-      return std::move( GraphicsContext(impl) );
+      return std::move(GraphicsContext(impl));
     }
     return nullptr;
   }

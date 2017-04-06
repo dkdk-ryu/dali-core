@@ -6,10 +6,10 @@
 #define DALI_CORE_GRAPHICS_CONTEXT_IMPL_BASE_H
 
 #include <dali/graphics/vulkan/common.h>
-#include <dali/graphics/vulkan/graphics-context.h>
 #include <dali/graphics/vulkan/graphics-adaptor.h>
-#include <dali/graphics/vulkan/graphics-swapchain.h>
+#include <dali/graphics/vulkan/graphics-context.h>
 #include <dali/graphics/vulkan/graphics-surface.h>
+#include <dali/graphics/vulkan/graphics-swapchain.h>
 #include <cinttypes>
 
 namespace Dali
@@ -24,12 +24,17 @@ namespace Internal
 class GraphicsContextImplBase
 {
 public:
-  GraphicsContextImplBase(const GraphicsAdaptor& adaptor, const GraphicsSurface& surface, const ExtensionNameList& extensions);
+  GraphicsContextImplBase(const GraphicsAdaptor&   adaptor,
+                          const GraphicsSurface&   surface,
+                          const ExtensionNameList& extensions);
   ~GraphicsContextImplBase() = default;
 
   virtual bool Initialise() = 0;
 
-  virtual GraphicsSwapchain CreateSwapchain(const GraphicsSurface& surface, uint32_t bufferCount) = 0;
+  virtual GraphicsSwapchain CreateSwapchain(const GraphicsSurface& surface,
+                                            uint32_t               bufferCount,
+                                            DepthStencil           depthStencil,
+                                            bool                   enforceVSync) = 0;
 
   GraphicsAdaptor& GetGraphicsAdaptor();
   GraphicsSurface& GetSurface();
@@ -38,7 +43,6 @@ protected:
   GraphicsAdaptor mGraphicsAdaptor;
   GraphicsSurface mSurface;
 };
-
 
 } // Internal
 /*

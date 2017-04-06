@@ -113,6 +113,8 @@ public:
 
   vk::AllocationCallbacks *GetVkAllocator() const;
 
+  const vk::PhysicalDeviceMemoryProperties& GetVkMemoryProperties() const;
+
 private:
   LayerNameList GetLayerNameTable(const ValidationLayerFlags2 &flags) const;
 

@@ -387,6 +387,11 @@ vk::AllocationCallbacks* VulkanAdaptor::GetVkAllocator() const
   return mAllocatorCallbacks;
 }
 
+const vk::PhysicalDeviceMemoryProperties& VulkanAdaptor::GetVkMemoryProperties() const
+{
+  return mPhysicalDevice->mImpl->memoryProperties;
+}
+
 void VulkanAdaptor::SetValidationDebugChannels(const ValidationChannelFlags& channelFlags)
 {
   bool needsUpdate{false};

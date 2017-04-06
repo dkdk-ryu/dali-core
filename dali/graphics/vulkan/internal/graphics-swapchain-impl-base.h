@@ -25,6 +25,8 @@ public:
 
   virtual bool Initialise() = 0;
 
+  virtual void SwapBuffers( bool vsync ) = 0;
+
 protected:
 
   GraphicsContext mContext;

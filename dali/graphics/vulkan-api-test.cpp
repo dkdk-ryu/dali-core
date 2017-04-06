@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.hpp>
 #ifdef __linux__
 #include <X11/Xlib.h>
+#include <unistd.h>
 #endif
 
 
@@ -12,10 +13,10 @@
 // fixme: rather than using internal to provide template type
 // we shoud either register available adaptors or use compile time
 // deduction
-#include <dali/graphics/vulkan/internal/vulkan-adaptor.h>
-#include <dali/graphics/vulkan/surface/graphics-xlib-surface.h>
 #include <dali/graphics/vulkan/graphics-context.h>
+#include <dali/graphics/vulkan/internal/vulkan-adaptor.h>
 #include <dali/graphics/vulkan/internal/vulkan-swapchain.h>
+#include <dali/graphics/vulkan/surface/graphics-xlib-surface.h>
 
 using namespace Dali::Graphics::Vulkan;
 
@@ -47,7 +48,7 @@ int main(int argc, char** argv)
   InitWindow(720, 360);
 
   // using template argument to pick adaptor implementation
-  GraphicsAdaptor adaptor = GraphicsAdaptor::New<Internal::VulkanAdaptor>();
+  GraphicsAdaptor   adaptor = GraphicsAdaptor::New< Internal::VulkanAdaptor >();
   ExtensionNameList list;
 
   // check extension
@@ -57,25 +58,27 @@ int main(int argc, char** argv)
     list.emplace_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
 
   // initialise
-  adaptor.Initialise(list, ValidationLayerFlags2() |
-                           ValidationLayerBit2::CORE_VALIDATION | ValidationLayerBit2::STANDARD_VALIDATION |
-                           ValidationLayerBit2::PARAMETER_VALIDATION|ValidationLayerBit2::API_DUMP);
+  adaptor.Initialise(list,
+                     ValidationLayerFlags2()
+  | ValidationLayerBit2::CORE_VALIDATION |
+                         ValidationLayerBit2::STANDARD_VALIDATION |
+                         ValidationLayerBit2::PARAMETER_VALIDATION | ValidationLayerBit2::API_DUMP);
 
   // reporting on all channels
-  adaptor.SetValidationDebugChannels( ValidationChannelBit::ALL );
+  adaptor.SetValidationDebugChannels(ValidationChannelBit::ALL);
 
   // choose first available physical adaptor
   bool result = adaptor.ChoosePhysicalDevice(PhysicalDeviceBit::ANY);
 
-  if( !result ) // no requested device available ( maybe adding enumeration )
+  if(!result) // no requested device available ( maybe adding enumeration )
   {
     // fixme, something went very wrong
   }
 
   // create surface for X11 ( could be templated GraphicsAdaptor function? )
-  auto surface = adaptor.CreateSurface<Internal::GraphicsXlibSurface>( adaptor, gWnd.display, gWnd.window );
+  auto surface = adaptor.CreateSurface< Internal::GraphicsXlibSurface >(adaptor, gWnd.display, gWnd.window);
 
-  if( !surface )
+  if(!surface)
   {
     VkLog("No surface dammit!");
   }
@@ -84,9 +87,13 @@ int main(int argc, char** argv)
   auto context = adaptor.CreateContext(surface);
 
   // create swapchain ( 2 buffers )
-  auto swapchain = context.CreateSwapchain( surface, 2 );
+  auto swapchain = context.CreateSwapchain(surface, 2, DepthStencil::DEPTH_24, true);
 
-
+  while( 1 )
+  {
+    usleep(16000);
+    swapchain.SwapBuffers( true );
+  }
 
   return 0;
 }

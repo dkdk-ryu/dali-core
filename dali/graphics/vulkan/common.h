@@ -17,6 +17,7 @@ namespace Graphics
 {
 namespace Vulkan
 {
+void VkLog(const char *format, ...);
 
 #define VkAssert( var, message ) \
 {\
@@ -27,8 +28,29 @@ assert( var.result == vk::Result::eSuccess );\
 }\
 }
 
-void VkLog(const char *format, ...);
+#define VkAssertCall( call ) \
+{\
+auto _result = call; \
+if( _result != vk::Result::eSuccess )\
+{\
+VkLog("[VkAssertCall] %s:%d: %s", __FILE__, __LINE__, #call );\
+assert( _result == vk::Result::eSuccess );\
+}\
+}
 
+inline vk::Result VkTestCallFn( vk::Result result, const char* file, const char* call, int line  )
+{
+  if( result != vk::Result::eSuccess )
+  {
+    VkLog("[VkTestCall] %s:%d: %s -> Result = %d", file, line, call, static_cast<int>( result ) );
+  }
+  return result;
+}
+
+#define VkTestCall( call ) \
+VkTestCallFn( call, __FILE__, #call, __LINE__ )
+
+;
 // helper template to create relation between flags and bits
 template< typename BitType, typename FlagType = uint32_t >
 struct BitFlags

@@ -1,15 +1,28 @@
-//
-// Created by adam.b on 27/03/17.
-//
+#ifndef DALI_CORE_GRAPHICS_VULKAN_COMMON_H
+#define DALI_CORE_GRAPHICS_VULKAN_COMMON_H
 
-#ifndef DALI_CORE_COMMON_H
-#define DALI_CORE_COMMON_H
+/*
+ * Copyright (c) 2017 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 #include <vulkan/vulkan.hpp>
 
+#include <cassert>
 #include <cinttypes>
 #include <memory>
-#include <cassert>
 
 namespace Dali
 {
@@ -17,40 +30,49 @@ namespace Graphics
 {
 namespace Vulkan
 {
-void VkLog(const char *format, ...);
+void VkLog(const char* format, ...);
 
-#define VkAssert( var, message ) \
-{\
-if( var.result != vk::Result::eSuccess )\
-{\
-VkLog("[Assert] %s", message );\
-assert( var.result == vk::Result::eSuccess );\
-}\
-}
+#define VkAssert(var, message)                    \
+  {                                               \
+    if(var.result != vk::Result::eSuccess)        \
+    {                                             \
+      VkLog("[Assert] %s", message);              \
+      assert(var.result == vk::Result::eSuccess); \
+    }                                             \
+  }
 
-#define VkAssertCall( call ) \
-{\
-auto _result = call; \
-if( _result != vk::Result::eSuccess )\
-{\
-VkLog("[VkAssertCall] %s:%d: %s", __FILE__, __LINE__, #call );\
-assert( _result == vk::Result::eSuccess );\
-}\
-}
+#define VkAssertCall(call)                                          \
+  {                                                                 \
+    auto _result = call;                                            \
+    if(_result != vk::Result::eSuccess)                             \
+    {                                                               \
+      VkLog("[VkAssertCall] %s:%d: %s", __FILE__, __LINE__, #call); \
+      assert(_result == vk::Result::eSuccess);                      \
+    }                                                               \
+  }
 
-inline vk::Result VkTestCallFn( vk::Result result, const char* file, const char* call, int line  )
+#define VkAssertCallMsg(call, msg)                                           \
+  {                                                                          \
+    auto _result = call;                                                     \
+    if(_result != vk::Result::eSuccess)                                      \
+    {                                                                        \
+      VkLog("[VkAssertCall] %s:%d: %s, %s", __FILE__, __LINE__, #call, msg); \
+      assert(_result == vk::Result::eSuccess);                               \
+    }                                                                        \
+  }
+
+inline vk::Result VkTestCallFn(vk::Result result, const char* file, const char* call, int line)
 {
-  if( result != vk::Result::eSuccess )
+  if(result != vk::Result::eSuccess)
   {
-    VkLog("[VkTestCall] %s:%d: %s -> Result = %d", file, line, call, static_cast<int>( result ) );
+    VkLog("[VkTestCall] %s:%d: %s -> Result = %d", file, line, call, static_cast< int >(result));
   }
   return result;
 }
 
-#define VkTestCall( call ) \
-VkTestCallFn( call, __FILE__, #call, __LINE__ )
+#define VkTestCall(call) VkTestCallFn(call, __FILE__, #call, __LINE__)
+}
 
-;
 // helper template to create relation between flags and bits
 template< typename BitType, typename FlagType = uint32_t >
 struct BitFlags
@@ -61,7 +83,7 @@ struct BitFlags
   {
   }
 
-  BitFlags(const BitType &bit)
+  BitFlags(const BitType& bit)
   {
     flags = static_cast< FlagType >(bit);
   }
@@ -76,23 +98,23 @@ struct BitFlags
     return srcFlags == flags;
   }
 
-  bool operator!=(const FlagType &srcFlags) const
+  bool operator!=(const FlagType& srcFlags) const
   {
     return srcFlags != flags;
   }
 
-  BitFlags operator|(const BitType &bit)
+  BitFlags operator|(const BitType& bit)
   {
     return BitFlags(flags | static_cast< FlagType >(bit));
   }
 
-  BitFlags &operator|=(const BitType &bit)
+  BitFlags& operator|=(const BitType& bit)
   {
     flags |= static_cast< FlagType >(bit);
     return *this;
   }
 
-  BitFlags operator&(const BitFlags &rhs) const
+  BitFlags operator&(const BitFlags& rhs) const
   {
     return FlagType{(rhs.flags & flags)};
   }
@@ -108,8 +130,8 @@ struct BitFlags
 template< typename T >
 using UPtr = std::unique_ptr< T >;
 
-using ExtensionNameList = std::vector< const char * >;
-using LayerNameList     = std::vector< const char * >;
+using ExtensionNameList = std::vector< const char* >;
+using LayerNameList     = std::vector< const char* >;
 
 // fixme temporary workaround to stop passing references around
 template< typename T >
@@ -117,16 +139,16 @@ class Handle
 {
 public:
   Handle() = default;
-  Handle(T *ptr) : mObject(ptr)
+  Handle(T* ptr) : mObject(ptr)
   {
   }
-  Handle(const Handle &) = default;
-  Handle(Handle &)       = default;
-  Handle(Handle &&)      = default;
-  Handle operator=(Handle &&) = delete;
-  ~Handle()                   = default;
+  Handle(const Handle&) = default;
+  Handle(Handle&)       = default;
+  Handle(Handle&&)      = default;
+  Handle operator=(Handle&&) = delete;
+  ~Handle()                  = default;
 
-  T *operator->()
+  T* operator->()
   {
     return mObject;
   }
@@ -137,15 +159,15 @@ public:
   }
 
   template< typename P >
-  P *StaticCast()
+  P* StaticCast()
   {
-    return static_cast< P * >(mObject);
+    return static_cast< P* >(mObject);
   }
 
   template< typename P >
-  P *DynamicCast()
+  P* DynamicCast()
   {
-    return dynamic_cast< P * >(mObject);
+    return dynamic_cast< P* >(mObject);
   }
 
   T* GetObject() const
@@ -153,21 +175,20 @@ public:
     return mObject;
   }
 
-  template <typename K>
+  template< typename K >
   K* GetObjectAs() const
   {
-    return static_cast<K*>(mObject);
+    return static_cast< K* >(mObject);
   }
 
 protected:
-
-  void SetObject( T* object )
+  void SetObject(T* object)
   {
     mObject = object;
   }
 
 private:
-  T *mObject { nullptr };
+  T* mObject{nullptr};
 };
 
 // common for adaptor
@@ -199,21 +220,168 @@ enum class ValidationChannelBit
   ALL                 = 0xFF
 };
 
-using ValidationLayerFlags2     = BitFlags< ValidationLayerBit2 >;
-using ValidationChannelFlags    = BitFlags< ValidationChannelBit >;
+using ValidationLayerFlags2  = BitFlags< ValidationLayerBit2 >;
+using ValidationChannelFlags = BitFlags< ValidationChannelBit >;
 
 enum class PhysicalDeviceBit
 {
   // physical device type
-  ANY = 0,
-  DISCRETE = (1 << 0),
+  ANY        = 0,
+  DISCRETE   = (1 << 0),
   INTEGRATED = (1 << 1)
 };
 
 using PhysicalDeviceFlags = BitFlags< PhysicalDeviceBit >;
 
-}
+/// -----------------------------------------------------
+// vulkan only some sort of managed objects support
+//
+class VkObject
+{
+public:
+  VkObject()          = default;
+  virtual ~VkObject() = default;
+
+  uint32_t RetainRef()
+  {
+    return ++mObjectRefCount;
+  }
+
+  uint32_t ReleaseRef()
+  {
+    return --mObjectRefCount;
+  }
+
+  uint32_t GetRefCount()
+  {
+    return mObjectRefCount;
+  }
+
+  // handles releasing of vulkan object before being deleted
+  // or moved to discard queue
+  virtual bool OnSafeDelete()
+  {
+    return true;
+  }
+
+private:
+  uint32_t mObjectRefCount{0};
+};
+
+template< typename OBJECT >
+class VkHandleBase
+{
+public:
+  VkHandleBase() = default;
+  VkHandleBase(OBJECT* ptr)
+  {
+    mObject = ptr;
+    if(mObject)
+      static_cast< VkObject* >(mObject)->RetainRef();
+  }
+
+  VkHandleBase(const VkHandleBase& handle)
+  {
+    if(handle.mObject)
+      static_cast< VkObject* >(handle.mObject)->RetainRef();
+
+    mObject = handle.mObject;
+  }
+
+  virtual ~VkHandleBase()
+  {
+    if(mObject)
+    {
+      static_cast< VkObject* >(mObject)->ReleaseRef();
+      TrySafeDelete();
+    }
+  }
+
+  VkHandleBase& operator=(OBJECT* ptr)
+  {
+    if(mObject == ptr)
+      return *this;
+    if(mObject)
+    {
+      static_cast< VkObject* >(mObject)->ReleaseRef();
+      TrySafeDelete();
+    }
+    if(ptr)
+      static_cast< VkObject* >(ptr)->RetainRef();
+    mObject = ptr;
+  }
+
+  VkHandleBase& operator=(const VkHandleBase& handle)
+  {
+    if(handle.mObject == mObject)
+      return *this;
+    if(mObject)
+    {
+      static_cast< VkObject* >(mObject)->ReleaseRef();
+      TrySafeDelete();
+    }
+    mObject = handle.mObject;
+    if(mObject)
+      static_cast< VkObject* >(mObject)->RetainRef();
+    return *this;
+  }
+
+  OBJECT* GetObject() const
+  {
+    return mObject;
+  }
+
+  operator bool() const
+  {
+    return mObject != nullptr;
+  }
+
+  bool operator!() const
+  {
+    return mObject == nullptr;
+  }
+
+  void Reset()
+  {
+    if(mObject)
+      static_cast< VkObject* >(mObject)->ReleaseRef();
+    TrySafeDelete();
+    mObject = nullptr;
+  }
+
+  bool TrySafeDelete()
+  {
+    if(!static_cast< VkObject* >(mObject)->GetRefCount())
+    {
+      if(static_cast< VkObject* >(mObject)->OnSafeDelete())
+        delete mObject;
+    }
+    // todo: deletion didn't go well, should be asserted?
+    return false;
+  }
+
+  template< typename T >
+  T Cast()
+  {
+    return T(dynamic_cast< OBJECT* >(mObject));
+  }
+
+protected:
+  OBJECT* mObject{nullptr};
+};
+
+using VkHandle = VkHandleBase< VkObject >;
+
+enum class QueueType : uint32_t
+{
+  GRAPHICS       = 0u,
+  COMPUTE        = 1u,
+  TRANSFER       = 2u,
+  SPARSE_BINDING = 3u,
+  PRESENT        = 4u,
+  END
+};
 }
 }
 
-#endif //DALI_CORE_COMMON_H
+#endif //DALI_CORE_GRAPHICS_VULKAN_COMMON_H
